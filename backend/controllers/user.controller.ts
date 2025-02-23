@@ -16,20 +16,18 @@ class UserController {
       });
       if (error) {
         res.status(400).send(error);
-        next();
+        return;
       }
-      const userRes = userService.createUser({
+      const userRes = await userService.createUser({
         username,
         password: await bcrypt.hash(password, 10),
         email,
         role,
       });
-      console.log(userRes);
-      res.status(201).send(`Create user ${username} successfully`);
-      next();
+      res.status(201).json({ username: username, email: email });
+      return;
     } catch (error) {
-      res.status(500).send(error);
-      next();
+      res.status(500).send(error)
     }
   };
   login = async (req: Request, res: Response, next: NextFunction) => {
@@ -45,15 +43,15 @@ class UserController {
           access_token: access_token,
           refresh_token: refresh_token,
         });
+      } else {
+        res.status(404).send("No credential");
       }
-      res.status(404).send("No credential");
     } catch (error) {
       console.log(error);
     }
   };
   logout = async (req: Request, res: Response, next: NextFunction) => {
     res.status(200).json({});
-    next();
   };
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     const { username } = req.body;
@@ -63,7 +61,6 @@ class UserController {
     res.status(200).json({
       access_token,
     });
-    next();
   };
 }
 
